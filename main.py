@@ -47,7 +47,7 @@ def setup_arg():
                         help=f'Use this argument for {Fore.GREEN}input mode{Style.RESET_ALL} challange.')
     
     parser.add_argument('-uw', '--use_words',
-                        metavar='',
+                        metavar= Fore.LIGHTBLACK_EX +'"words"'+ Style.RESET_ALL,
                         choices='words',
                         default='letters',
                         help=f'Use this argument for {Fore.GREEN}random words{Style.RESET_ALL} typing challange.')
