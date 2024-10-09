@@ -48,6 +48,7 @@ def setup_arg():
     
     parser.add_argument('-uw', '--use_words',
                         metavar='',
+                        choices='words',
                         default='letters',
                         help=f'Use this argument for {Fore.GREEN}random words{Style.RESET_ALL} typing challange.')
     
@@ -115,7 +116,67 @@ def letters_game(lim, mode):
     display_result(total_count, correct_count, total_time, correct_time, incorrect_time, start_time)
 
 def words_game(lim, mode):
-    pass
+    word_generator = RandomWords()
+    start_time = time()
+    correct_count, total_count = 0, 0
+    total_time, correct_time, incorrect_time = 0, 0, 0
+
+    while True:
+        try:
+            random_word = word_generator.get_random_word()  # Corrected here
+            if not random_word:
+                raise ValueError("Failed to retrieve a random word.")
+        except Exception as e:
+            print(Fore.RED + f"Error fetching word: {e}" + Fore.RESET)
+            break
+
+        print(f"\nType the word: {Fore.YELLOW}{random_word}{Fore.RESET}")
+        typed_word = ""
+        word_input_start = time()
+
+        while True:
+            user_input = readkey()
+
+            if user_input == ' ':
+                interruption_handel() # Leads to the interruption when the user presses the "space"
+
+            if user_input == '\x7f':  # Backspace
+                if typed_word:
+                    typed_word = typed_word[:-1]
+                    print('\b \b', end='', flush=True)
+            else:
+                typed_word += user_input
+                print(user_input, end='', flush=True)
+
+            if len(typed_word) >= len(random_word):
+                break
+        
+        for i in range(len(typed_word)):
+            print('\b', end='', flush=True)
+
+        word_input_end = time()
+        word_duration = word_input_end - word_input_start
+
+        results_list.append(InputData(requested=random_word, received=typed_word.strip(), duration=word_duration))
+
+        if typed_word.strip().lower() == random_word.lower():
+            print(f'You typed word: {Fore.GREEN}{typed_word.strip().lower()}{Fore.RESET}')
+            correct_count += 1
+            correct_time += word_duration
+        else:
+            print(f'You typed word: {Fore.RED}{typed_word.strip().lower()}{Fore.RESET}')
+            incorrect_time += word_duration
+
+        total_count += 1
+        total_time += word_duration
+
+        # Game ending conditions
+        if mode == 'Input-based' and total_count >= lim:
+            break
+        elif mode == 'Time-based' and (time() - start_time) >= lim:
+            break
+
+    display_result(total_count, correct_count, total_time, correct_time, incorrect_time, start_time)
 
 def display_result(total_inputs, correct_inputs, total_duration, correct_duration, incorrect_duration, start_time):
     accuracy = (correct_inputs / total_inputs) * 100 if total_inputs > 0 else 0
